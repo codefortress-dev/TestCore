@@ -20,6 +20,7 @@
     <module>easy-rate-limit</module>
     <module>easy-geo-block</module>
     <module>easy-captcha</module>
+    <module>easy-config-persistence</module>
   </modules>
 
   <properties>

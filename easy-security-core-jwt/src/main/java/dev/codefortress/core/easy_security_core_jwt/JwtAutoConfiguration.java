@@ -11,6 +11,8 @@ public class JwtAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public JwtTokenUtil jwtTokenUtil(JwtProperties properties) {
+        // Escanea la clase para exponer sus campos en la UI (si está presente)
+        EasyConfigScanner.preload(JwtProperties.class);
         return new JwtTokenUtil(properties.getSecretKey(), properties.getExpirationSeconds());
     }
 }

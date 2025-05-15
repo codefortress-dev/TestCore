@@ -1,6 +1,8 @@
 package dev.codefortress.core.easy_security_core_jwt;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@AutoLoadable
+@EasyConfigProperty(description = "Clave secreta HS256 para firmar JWTs")
 @ConfigurationProperties(prefix = "easy.security.jwt")
 public class JwtProperties {
     private String secretKey;

@@ -1,0 +1,3 @@
+easy:
+  jwt:
+    secret: "clave-jwt-en-yaml"
