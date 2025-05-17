@@ -1,5 +1,6 @@
 package dev.codefortress.core.easy_licensing;
 
+import dev.codefortress.core.easy_config_ui.ConfigurationValidator;
 import dev.codefortress.core.easy_config_ui.EasyConfigScanner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,9 +11,10 @@ import org.springframework.context.annotation.Bean;
 public class LicensingAutoConfiguration {
 
     @Bean
-    public SecuritySuiteLicenseProperties securitySuiteLicenseProperties() {
+    public SecuritySuiteLicenseProperties validatedSecuritySuiteLicenseProperties(SecuritySuiteLicenseProperties props) {
         EasyConfigScanner.preload(SecuritySuiteLicenseProperties.class);
-        return new SecuritySuiteLicenseProperties();
+        ConfigurationValidator.validate(props);
+        return props;
     }
 
     @Bean
@@ -20,8 +22,8 @@ public class LicensingAutoConfiguration {
         LicenseEnvironmentResolver env,
         LicenseRemoteValidator remote,
         StoredLicenseCache cache,
-        LicenseSignatureVerifier verifier) {
-
+        LicenseSignatureVerifier verifier
+    ) {
         return new LicenseValidator(env, remote, cache, verifier);
     }
 
@@ -42,6 +44,6 @@ public class LicensingAutoConfiguration {
 
     @Bean
     public LicenseSignatureVerifier licenseSignatureVerifier() {
-        return new LicenseSignatureVerifier();
+        return new LicenseSignatureVerifier("LICENSE_SECRET"); // reemplaza con el valor real
     }
 }

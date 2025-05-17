@@ -1,5 +1,6 @@
 package dev.codefortress.core.easy_captcha;
 
+import dev.codefortress.core.easy_config_ui.ConfigurationValidator;
 import dev.codefortress.core.easy_config_ui.EasyConfigScanner;
 import dev.codefortress.core.easy_licensing.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -19,9 +20,10 @@ import java.util.List;
 public class CaptchaAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
-    public CaptchaProperties captchaProperties() {
+    public CaptchaProperties validatedCaptchaProperties(CaptchaProperties props) {
         EasyConfigScanner.preload(CaptchaProperties.class);
-        return new CaptchaProperties();
+        ConfigurationValidator.validate(props);
+        return props;
     }
 
     @Bean
@@ -47,13 +49,13 @@ public class CaptchaAutoConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(captchaInterceptor(
-                captchaService(captchaProperties()),
-                new SecuritySuiteLicenseProperties(),
-                new LicenseValidator(
-                    new LicenseEnvironmentResolver(),
-                    new LicenseRemoteValidator(),
-                    new StoredLicenseCache(),
-                    new LicenseSignatureVerifier()))
+            captchaService(validatedCaptchaProperties(null)),
+            new SecuritySuiteLicenseProperties(),
+            new LicenseValidator(
+                new LicenseEnvironmentResolver(),
+                new LicenseRemoteValidator(),
+                new StoredLicenseCache(),
+                new LicenseSignatureVerifier()))
         ).order(2);
     }
 }

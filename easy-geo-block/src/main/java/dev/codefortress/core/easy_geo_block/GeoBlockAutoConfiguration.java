@@ -1,5 +1,6 @@
 package dev.codefortress.core.easy_geo_block;
 
+import dev.codefortress.core.easy_config_ui.ConfigurationValidator;
 import dev.codefortress.core.easy_config_ui.EasyConfigScanner;
 import dev.codefortress.core.easy_licensing.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,9 +18,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class GeoBlockAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
-    public GeoBlockProperties geoBlockProperties() {
+    public GeoBlockProperties validatedGeoBlockProperties(GeoBlockProperties props) {
         EasyConfigScanner.preload(GeoBlockProperties.class);
-        return new GeoBlockProperties();
+        ConfigurationValidator.validate(props);
+        return props;
     }
 
     @Bean
@@ -48,13 +50,13 @@ public class GeoBlockAutoConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(geoBlockInterceptor(
-                geoBlockService(geoLocationProvider(), geoBlockProperties()),
-                new SecuritySuiteLicenseProperties(),
-                new LicenseValidator(
-                    new LicenseEnvironmentResolver(),
-                    new LicenseRemoteValidator(),
-                    new StoredLicenseCache(),
-                    new LicenseSignatureVerifier()))
+            geoBlockService(geoLocationProvider(), validatedGeoBlockProperties(null)),
+            new SecuritySuiteLicenseProperties(),
+            new LicenseValidator(
+                new LicenseEnvironmentResolver(),
+                new LicenseRemoteValidator(),
+                new StoredLicenseCache(),
+                new LicenseSignatureVerifier()))
         ).order(1);
     }
 }
