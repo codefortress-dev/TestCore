@@ -1,23 +1,24 @@
 package dev.codefortress.core.easy_config_ui;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryConfigStore implements EasyConfigStore {
 
-    private final Map<String, String> configValues = new ConcurrentHashMap<>();
+    private final Map<String, String> store = new ConcurrentHashMap<>();
 
     @Override
     public String get(String key) {
-        return configValues.get(key);
+        return store.get(key);
     }
 
     @Override
     public void set(String key, String value) {
-        configValues.put(key, value);
+        store.put(key, value);
     }
 
     @Override
-    public Map<String, String> getAll() {
-        return Map.copyOf(configValues);
+    public boolean contains(String key) {
+        return store.containsKey(key);
     }
 }

@@ -1,24 +1,19 @@
 package dev.codefortress.core.easy_licensing;
-import java.net.InetAddress;
 
 public class LicenseEnvironmentResolver {
 
-    /**
-     * Determina si la app está corriendo en un entorno de desarrollo/local
-     */
-    public boolean isDevelopmentEnvironment() {
-        try {
-            String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+    public boolean isDevOrLocal() {
+        String env = System.getenv("EASY_ENV");
+        return env == null || env.equalsIgnoreCase("dev") || env.equalsIgnoreCase("local") ||
+               isLocalhost(System.getenv("HOSTNAME"));
+    }
 
-            return hostname.contains("localhost")
-                    || hostname.contains("127.0.0.1")
-                    || hostname.contains("dev")
-                    || hostname.contains("test")
-                    || System.getenv("ENV") != null && System.getenv("ENV").equalsIgnoreCase("dev")
-                    || System.getProperty("env") != null && System.getProperty("env").equalsIgnoreCase("dev");
+    private boolean isLocalhost(String hostname) {
+        return hostname == null || hostname.contains("localhost");
+    }
 
-        } catch (Exception e) {
-            return false;
-        }
+    public String resolveDomain() {
+        String env = System.getenv("APP_DOMAIN");
+        return (env != null && !env.isBlank()) ? env : "localhost";
     }
 }

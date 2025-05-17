@@ -1,6 +1,6 @@
 package dev.codefortress.core.easy_config_persistence;
 
-import dev.codefortress.configui.EasyConfigStore;
+import dev.codefortress.core.easy_config_ui.EasyConfigStore;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
@@ -30,11 +30,9 @@ public class JpaConfigStoreInitializer {
         for (ConfigEntity entity : configs) {
             String key = entity.getKey();
             String value = entity.getValue();
-
-            // Sobrescribe en el store activo si el valor de DB tiene prioridad
             activeStore.set(key, value);
         }
 
-        System.out.println("[easy-config-persistence] Configuración cargada desde la base de datos.");
+        System.out.println("[easy-config-persistence] Configuración cargada desde base de datos.");
     }
 }

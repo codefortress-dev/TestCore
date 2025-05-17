@@ -1,8 +1,9 @@
 package dev.codefortress.core.easy_licensing;
+
 public enum LicenseCheckResult {
     VALID,
     INVALID,
     TRIAL,
-    EXPIRED,
+    TRIAL_EXPIRED,
     DEVELOPMENT_MODE
 }

@@ -1,69 +1,74 @@
 package dev.codefortress.core.easy_licensing;
-import java.time.LocalDate;
+
+import java.time.Duration;
+import java.time.Instant;
 
 public class LicenseValidator {
 
-    private final LicenseProperties properties;
+    private static final int TRIAL_DAYS = 21;
+
     private final LicenseEnvironmentResolver environmentResolver;
     private final LicenseRemoteValidator remoteValidator;
-    private final StoredLicenseCache licenseCache;
-    private final LicenseSignatureVerifier signatureVerifier;
+    private final StoredLicenseCache cache;
+    private final LicenseSignatureVerifier verifier;
+    private final TrialMetadataStore trialMetadataStore = new TrialMetadataStore();
 
     public LicenseValidator(
-            LicenseProperties properties,
-            LicenseEnvironmentResolver environmentResolver,
-            LicenseRemoteValidator remoteValidator,
-            StoredLicenseCache licenseCache,
-            LicenseSignatureVerifier signatureVerifier) {
-        this.properties = properties;
+        LicenseEnvironmentResolver environmentResolver,
+        LicenseRemoteValidator remoteValidator,
+        StoredLicenseCache cache,
+        LicenseSignatureVerifier verifier
+    ) {
         this.environmentResolver = environmentResolver;
         this.remoteValidator = remoteValidator;
-        this.licenseCache = licenseCache;
-        this.signatureVerifier = signatureVerifier;
+        this.cache = cache;
+        this.verifier = verifier;
     }
 
-    public LicenseInfo validate() {
-        // Detecta si es un entorno de desarrollo
-        if (environmentResolver.isDevelopmentEnvironment()) {
-            return new LicenseInfo(
-                    properties.getProduct(),
-                    "localhost",
-                    LocalDate.now().plusYears(100),
-                    LicenseCheckResult.DEVELOPMENT_MODE
-            );
+    public LicenseCheckResult validate(SecuritySuiteLicenseProperties props) {
+        String product = "security-suite";
+        String key = props.getKey();
+        String domain = environmentResolver.resolveDomain();
+
+        if (environmentResolver.isDevOrLocal()) {
+            return LicenseCheckResult.DEVELOPMENT_MODE;
         }
 
-        // Si no hay clave, se asume modo prueba
-        if (properties.getKey() == null || properties.getKey().isBlank()) {
-            return new LicenseInfo(
-                    properties.getProduct(),
-                    "unknown",
-                    LocalDate.now().plusDays(15),
-                    LicenseCheckResult.TRIAL
-            );
-        }
-
-        // Intenta validación remota
-        try {
-            LicenseInfo licenseInfo = remoteValidator.validateOnline(properties);
-            licenseCache.save(licenseInfo); // Guarda localmente si es válida
-            return licenseInfo;
-        } catch (Exception e) {
-            // Si falla la conexión remota, intenta validación offline
-            try {
-                LicenseInfo cached = licenseCache.load(properties.getProduct());
-                if (signatureVerifier.isValid(cached, properties)) {
-                    return cached;
-                }
-            } catch (Exception ex) {
-                // No hay caché o está corrupta
+        if (key != null && !key.isBlank()) {
+            // Intentar validación remota
+            LicenseInfo info = remoteValidator.validate(product, key, domain);
+            if (info != null && info.getStatus() == LicenseCheckResult.VALID) {
+                cache.store(info);
+                return LicenseCheckResult.VALID;
             }
-            return new LicenseInfo(
-                    properties.getProduct(),
-                    "unknown",
-                    LocalDate.now(),
-                    LicenseCheckResult.INVALID
-            );
+
+            // Fallback: validar desde cache local
+            LicenseInfo cached = cache.get(product);
+            if (cached != null && cached.getStatus() == LicenseCheckResult.VALID) {
+                return LicenseCheckResult.VALID;
+            }
+
+            // Validación offline con firma digital (si aplicas)
+            if (verifier.isValidSignature(key, product, domain)) {
+                return LicenseCheckResult.VALID;
+            }
+
+            return LicenseCheckResult.INVALID;
         }
+
+        // No hay clave: modo trial
+        Instant trialStart = trialMetadataStore.getTrialStart(product);
+        if (trialStart == null) {
+            trialStart = Instant.now();
+            trialMetadataStore.saveTrialStart(product, trialStart);
+            return LicenseCheckResult.TRIAL;
+        }
+
+        long days = Duration.between(trialStart, Instant.now()).toDays();
+        if (days <= TRIAL_DAYS) {
+            return LicenseCheckResult.TRIAL;
+        }
+
+        return LicenseCheckResult.TRIAL_EXPIRED;
     }
 }

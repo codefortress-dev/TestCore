@@ -1,9 +1,8 @@
 package dev.codefortress.core.easy_config_ui;
+
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/easy-config")
@@ -15,34 +14,26 @@ public class EasyConfigController {
         this.configStore = configStore;
     }
 
-    /**
-     * Lista todas las propiedades disponibles y su valor actual
-     */
     @GetMapping
-    public List<ConfigEntry> list() {
-        return configStore.getAll().entrySet().stream()
-                .map(entry -> new ConfigEntry(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+    public List<Map<String, Object>> list() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (EasyConfigScanner.ConfigMetadata meta : EasyConfigScanner.getAll()) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("key", meta.key());
+            entry.put("description", meta.description());
+            entry.put("value", configStore.get(meta.key()));
+            result.add(entry);
+        }
+        return result;
     }
 
-    /**
-     * Obtiene el valor de una propiedad
-     */
-    @GetMapping("/{key}")
-    public ConfigEntry get(@PathVariable String key) {
-        return new ConfigEntry(key, configStore.get(key));
-    }
-
-    /**
-     * Modifica una propiedad en caliente
-     */
     @PostMapping("/{key}")
-    public void update(@PathVariable String key, @RequestBody ConfigEntry entry) {
-        configStore.set(key, entry.value());
+    public Map<String, Object> update(@PathVariable String key, @RequestBody Map<String, String> body) {
+        if (!configStore.contains(key)) {
+            throw new RuntimeException("La clave '" + key + "' no está registrada.");
+        }
+        String value = body.get("value");
+        configStore.set(key, value);
+        return Map.of("key", key, "newValue", value);
     }
-
-    /**
-     * DTO simple
-     */
-    public record ConfigEntry(String key, String value) {}
 }

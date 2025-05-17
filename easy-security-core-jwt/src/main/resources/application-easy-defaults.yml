@@ -1,3 +1,4 @@
 easy:
   jwt:
-    secret: "clave-jwt-en-yaml"
+    secret-key: default-secret
+    expiration-seconds: 3600

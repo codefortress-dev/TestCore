@@ -1,48 +1,30 @@
-package dev.codefortress.geoblock;
+package dev.codefortress.core.easy_geo_block;
 
-import dev.codefortress.configui.EasyConfigProperty;
-import dev.codefortress.configui.AutoLoadable;
+import dev.codefortress.core.easy_config_ui.EasyConfigProperty;
+import dev.codefortress.core.easy_config_ui.AutoLoadable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
 @ConfigurationProperties(prefix = "easy.geo-block")
 @AutoLoadable
 public class GeoBlockProperties {
 
-    @EasyConfigProperty(description = "Habilita o deshabilita el bloqueo geográfico.")
-    private boolean enabled = false;
+    @EasyConfigProperty(description = "Habilita o deshabilita el bloqueo geográfico")
+    private boolean enabled = true;
 
-    @EasyConfigProperty(description = "Lista blanca de países permitidos (ISO ALPHA-2).")
-    private List<String> allowedCountries = List.of();
+    @EasyConfigProperty(description = "Lista de países permitidos (ISO alpha-2)")
+    private List<String> allowedCountries = List.of("CL", "AR", "PE");
 
-    @EasyConfigProperty(description = "Mensaje mostrado cuando se bloquea un país.")
-    private String blockMessage = "Acceso restringido desde tu país";
+    @EasyConfigProperty(description = "Mensaje personalizado cuando se bloquea por geolocalización")
+    private String blockMessage = "Acceso denegado desde esta ubicación.";
 
-    // Getters y Setters
-    public boolean isEnabled() {
-        return enabled;
-    }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+    public List<String> getAllowedCountries() { return allowedCountries; }
+    public void setAllowedCountries(List<String> allowedCountries) { this.allowedCountries = allowedCountries; }
 
-    public List<String> getAllowedCountries() {
-        return allowedCountries;
-    }
-
-    public void setAllowedCountries(List<String> allowedCountries) {
-        this.allowedCountries = allowedCountries;
-    }
-
-    public String getBlockMessage() {
-        return blockMessage;
-    }
-
-    public void setBlockMessage(String blockMessage) {
-        this.blockMessage = blockMessage;
-    }
+    public String getBlockMessage() { return blockMessage; }
+    public void setBlockMessage(String blockMessage) { this.blockMessage = blockMessage; }
 }

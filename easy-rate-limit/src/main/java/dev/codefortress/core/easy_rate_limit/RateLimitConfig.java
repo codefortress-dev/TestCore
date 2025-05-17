@@ -1,21 +1,17 @@
 package dev.codefortress.core.easy_rate_limit;
 
-import dev.codefortress.configui.AutoLoadable;
-import dev.codefortress.configui.EasyConfigProperty;
-import dev.codefortress.configui.EasyConfigStore;
+import dev.codefortress.core.easy_config_ui.AutoLoadable;
+import dev.codefortress.core.easy_config_ui.EasyConfigProperty;
+import dev.codefortress.core.easy_config_ui.EasyConfigStore;
 import jakarta.annotation.PostConstruct;
 
 @AutoLoadable
 public class RateLimitConfig {
 
-    @EasyConfigProperty(
-        value = "rate.limit.max-requests",
-        description = "Cantidad máxima de solicitudes permitidas por IP dentro del intervalo")
+    @EasyConfigProperty(description = "Cantidad máxima de solicitudes permitidas por IP dentro del intervalo")
     private int maxRequests = 100;
 
-    @EasyConfigProperty(
-        value = "rate.limit.interval-ms",
-        description = "Intervalo de tiempo en milisegundos para reiniciar el conteo")
+    @EasyConfigProperty(description = "Intervalo de tiempo en milisegundos para reiniciar el conteo")
     private long intervalMs = 60000;
 
     private final EasyConfigStore store;

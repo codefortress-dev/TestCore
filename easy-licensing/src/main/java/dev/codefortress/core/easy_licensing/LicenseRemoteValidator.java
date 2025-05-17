@@ -1,35 +1,32 @@
 package dev.codefortress.core.easy_licensing;
+
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class LicenseRemoteValidator {
 
-    private final WebClient webClient;
+    private final WebClient client;
 
     public LicenseRemoteValidator() {
-        // Puedes parametrizar el dominio más adelante (propiedades)
-        this.webClient = WebClient.builder()
+        this.client = WebClient.builder()
                 .baseUrl("https://license.codefortress.dev/api")
                 .build();
     }
 
-    public LicenseInfo validateOnline(LicenseProperties properties) {
+    public LicenseInfo validate(String product, String key, String domain) {
         try {
-            return webClient.post()
+            return client.post()
                     .uri("/validate")
-                    .bodyValue(new LicenseValidationRequest(properties.getProduct(), properties.getKey()))
+                    .bodyValue(new ValidationRequest(product, key, domain))
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, response ->
-                            response.createException().map(LicenseException::new)
-                    )
                     .bodyToMono(LicenseInfo.class)
                     .block();
-        } catch (Exception e) {
-            throw new LicenseException("Error contactando el servidor de licencias", e);
+        } catch (WebClientResponseException e) {
+            return null;
         }
     }
 
-    // Clase interna para request, o puede estar fuera si prefieres
-    private record LicenseValidationRequest(String product, String key) {}
+    private record ValidationRequest(String product, String key, String domain) {}
 }

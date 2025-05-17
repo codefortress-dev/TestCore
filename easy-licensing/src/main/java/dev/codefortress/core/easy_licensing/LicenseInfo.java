@@ -1,33 +1,50 @@
 package dev.codefortress.core.easy_licensing;
-import java.time.LocalDate;
 
 public class LicenseInfo {
 
     private String product;
-    private String domain;
-    private LocalDate validUntil;
+    private String key;
     private LicenseCheckResult status;
+    private String source; // REMOTE, CACHE, OFFLINE, etc.
 
-    public LicenseInfo(String product, String domain, LocalDate validUntil, LicenseCheckResult status) {
+    public LicenseInfo() {}
+
+    public LicenseInfo(String product, String key, LicenseCheckResult status, String source) {
         this.product = product;
-        this.domain = domain;
-        this.validUntil = validUntil;
+        this.key = key;
         this.status = status;
+        this.source = source;
     }
 
     public String getProduct() {
         return product;
     }
 
-    public String getDomain() {
-        return domain;
+    public void setProduct(String product) {
+        this.product = product;
     }
 
-    public LocalDate getValidUntil() {
-        return validUntil;
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public LicenseCheckResult getStatus() {
         return status;
+    }
+
+    public void setStatus(LicenseCheckResult status) {
+        this.status = status;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }

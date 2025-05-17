@@ -19,7 +19,7 @@ public class ConfigEntity {
     @Column(name = "module")
     private String module;
 
-    @Column(name = "source") // origen: YAML, UI, DB
+    @Column(name = "source")
     private String source;
 
     public ConfigEntity() {}
@@ -33,44 +33,18 @@ public class ConfigEntity {
     }
 
     // Getters y Setters
+    public String getKey() { return key; }
+    public void setKey(String key) { this.key = key; }
 
-    public String getKey() {
-        return key;
-    }
+    public String getValue() { return value; }
+    public void setValue(String value) { this.value = value; }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public String getValue() {
-        return value;
-    }
+    public String getModule() { return module; }
+    public void setModule(String module) { this.module = module; }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getModule() {
-        return module;
-    }
-
-    public void setModule(String module) {
-        this.module = module;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
 }

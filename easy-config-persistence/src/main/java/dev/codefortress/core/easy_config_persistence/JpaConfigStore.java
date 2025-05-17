@@ -1,12 +1,11 @@
 package dev.codefortress.core.easy_config_persistence;
 
-import dev.codefortress.configui.EasyConfigStore;
+import dev.codefortress.core.easy_config_ui.EasyConfigStore;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class JpaConfigStore implements EasyConfigStore {
@@ -35,7 +34,7 @@ public class JpaConfigStore implements EasyConfigStore {
     public void set(String key, String value) {
         cache.put(key, value);
 
-        ConfigEntity entity = configRepository.findById(key).orElseGet(() -> new ConfigEntity());
+        ConfigEntity entity = configRepository.findById(key).orElse(new ConfigEntity());
         entity.setKey(key);
         entity.setValue(value);
         entity.setSource("DB");

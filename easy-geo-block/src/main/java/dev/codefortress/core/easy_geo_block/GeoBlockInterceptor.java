@@ -28,9 +28,6 @@ public class GeoBlockInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    /**
-     * Extrae la IP real del cliente, considerando proxies.
-     */
     private String extractClientIp(HttpServletRequest request) {
         String xfHeader = request.getHeader("X-Forwarded-For");
         if (xfHeader != null && !xfHeader.isBlank()) {

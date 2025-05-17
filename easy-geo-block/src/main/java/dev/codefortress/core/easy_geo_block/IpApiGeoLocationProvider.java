@@ -1,8 +1,7 @@
 package dev.codefortress.core.easy_geo_block;
 
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -23,8 +22,8 @@ public class IpApiGeoLocationProvider implements GeoLocationProvider {
                     .uri("/{ip}/country/", ip)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .onErrorResume(WebClientResponseException.class, e -> Mono.empty())
-                    .block(); // bloqueo solo por ser llamada interna breve
+                    .onErrorResume(e -> Mono.empty())
+                    .block();
         } catch (Exception e) {
             return null;
         }

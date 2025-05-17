@@ -1,43 +1,34 @@
 package dev.codefortress.core.easy_rate_limit;
 
-import dev.codefortress.configui.EasyConfigStore;
-import dev.codefortress.configui.EasyConfigScanner;
+import dev.codefortress.core.easy_config_ui.EasyConfigScanner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfiguration
-public class RateLimitAutoConfiguration {
+@EnableConfigurationProperties(RateLimitProperties.class)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnProperty(prefix = "easy.rate-limit", name = "enabled", havingValue = "true", matchIfMissing = false)
+public class RateLimitAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
-    @ConditionalOnMissingBean
-    public RateLimitConfig rateLimitConfig(EasyConfigStore configStore) {
-        // Carga los valores definidos vía anotaciones
-        RateLimitConfig config = new RateLimitConfig();
-        EasyConfigScanner.preload(configStore, "dev.codefortress.core.easy_rate_limit");
-        return config;
+    public RateLimitProperties rateLimitProperties() {
+        EasyConfigScanner.preload(RateLimitProperties.class);
+        return new RateLimitProperties();
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public RateLimitStorage rateLimitStorage() {
-        return new InMemoryRateLimitStorage();
+    public RateLimitInterceptor rateLimitInterceptor(RateLimitProperties props) {
+        return new RateLimitInterceptor(props);
     }
 
-    @Bean
-    public RateLimitInterceptor rateLimitInterceptor(RateLimitStorage storage, RateLimitConfig config) {
-        return new RateLimitInterceptor(storage, config);
-    }
-
-    @Bean
-    public WebMvcConfigurer rateLimitConfigurer(RateLimitInterceptor interceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(interceptor).addPathPatterns("/**");
-            }
-        };
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimitInterceptor(rateLimitProperties()))
+                .order(0);
     }
 }

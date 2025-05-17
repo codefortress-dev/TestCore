@@ -12,42 +12,28 @@ public class CaptchaService {
         this.properties = properties;
     }
 
-    /**
-     * Verifica si la solicitud es sospechosa y debe ser bloqueada por comportamiento automático.
-     *
-     * @param request la solicitud HTTP entrante
-     * @return true si parece un bot y debe ser bloqueado
-     */
     public boolean isSuspicious(HttpServletRequest request) {
-        if (!properties.isEnabled()) {
-            return false;
-        }
+        if (!properties.isEnabled()) return false;
 
-        // 1. Validación de tiempo mínimo de respuesta
         String startTimeStr = request.getParameter("_formStartTime");
         if (startTimeStr != null) {
             try {
                 long startTime = Long.parseLong(startTimeStr);
                 long duration = System.currentTimeMillis() - startTime;
-                if (duration < properties.getMinResponseTimeMillis()) {
-                    return true; // Demasiado rápido
-                }
+                if (duration < properties.getMinResponseTimeMillis()) return true;
             } catch (NumberFormatException e) {
-                return true; // El valor no es válido → sospechoso
+                return true;
             }
         } else {
-            return true; // No se envió el tiempo → sospechoso
+            return true;
         }
 
-        // 2. Validación honeypot (campo oculto que no debería completarse)
         if (properties.isHoneypotEnabled()) {
             String honeypot = request.getParameter(properties.getHoneypotField());
-            if (honeypot != null && !honeypot.isBlank()) {
-                return true; // El campo honeypot fue rellenado → bot
-            }
+            if (honeypot != null && !honeypot.isBlank()) return true;
         }
 
-        return false; // Parece humano
+        return false;
     }
 
     public String getBlockMessage() {

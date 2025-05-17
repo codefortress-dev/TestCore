@@ -42,7 +42,7 @@
     <dependency>
       <groupId>dev.codefortress.core</groupId>
       <artifactId>easy-config-ui</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- Testing -->

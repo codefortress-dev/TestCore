@@ -1,0 +1,7 @@
+easy:
+  captcha:
+    enabled: true
+    min-response-time-millis: 1200
+    honeypot-enabled: true
+    honeypot-field: email_confirm
+    block-message: "Captcha no superado. Por favor, intenta nuevamente."

@@ -22,7 +22,6 @@ public class CaptchaInterceptor implements HandlerInterceptor {
         if (shouldIntercept(request.getRequestURI())) {
             if (captchaService.isSuspicious(request)) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setContentType("text/plain");
                 response.getWriter().write(captchaService.getBlockMessage());
                 return false;
             }

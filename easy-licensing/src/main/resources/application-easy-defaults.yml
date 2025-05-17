@@ -1,0 +1,5 @@
+easy:
+  license:
+    security-suite:
+      key: ""  # El usuario ingresará la clave aquí si ya la tiene, o dejará vacío para iniciar el trial
+

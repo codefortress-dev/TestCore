@@ -1,6 +1,6 @@
 package dev.codefortress.core.easy_config_persistence;
 
-import dev.codefortress.configui.EasyConfigStore;
+import dev.codefortress.core.easy_config_ui.EasyConfigStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,6 @@ public class JpaConfigStoreSaver implements EasyConfigStore {
 
         delegate.set(key, value); // Actualiza en memoria
 
-        // Guarda en base de datos solo si cambió
         if (!Objects.equals(current, value)) {
             ConfigEntity entity = repository.findById(key).orElse(new ConfigEntity());
             entity.setKey(key);

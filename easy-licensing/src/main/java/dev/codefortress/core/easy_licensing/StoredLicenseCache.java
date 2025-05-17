@@ -1,44 +1,52 @@
 package dev.codefortress.core.easy_licensing;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StoredLicenseCache {
 
-    private static final String LICENSE_DIR = System.getProperty("user.home") + File.separator + ".easy-licenses";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Path cacheDir = Paths.get(System.getProperty("user.home"), ".easy-licenses");
 
-    public void save(LicenseInfo licenseInfo) {
+    public void store(LicenseInfo info) {
         try {
-            File dir = new File(LICENSE_DIR);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            if (!Files.exists(cacheDir)) {
+                Files.createDirectories(cacheDir);
             }
+            Path file = cacheDir.resolve("license-" + info.getProduct() + ".json");
+            try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+                writer.write("{");
+                writer.write("\"key\":\"" + info.getKey() + "\",");
+                writer.write("\"status\":\"" + info.getStatus().name() + "\",");
+                writer.write("\"source\":\"CACHE\"");
+                writer.write("}");
+            }
+        } catch (IOException ignored) {}
+    }
 
-            File licenseFile = getFileForProduct(licenseInfo.getProduct());
-            objectMapper.writeValue(licenseFile, licenseInfo);
-        } catch (IOException e) {
-            throw new LicenseException("No se pudo guardar la licencia localmente", e);
+    public LicenseInfo get(String product) {
+        try {
+            Path file = cacheDir.resolve("license-" + product + ".json");
+            if (!Files.exists(file)) return null;
+
+            String content = Files.readString(file);
+            Map<String, String> parsed = parse(content);
+            return new LicenseInfo(product, parsed.get("key"), LicenseCheckResult.valueOf(parsed.get("status")), "CACHE");
+
+        } catch (Exception e) {
+            return null;
         }
     }
 
-    public LicenseInfo load(String product) {
-        try {
-            File licenseFile = getFileForProduct(product);
-            if (!licenseFile.exists()) {
-                throw new LicenseException("No hay licencia activada localmente para el producto: " + product);
-            }
-
-            return objectMapper.readValue(licenseFile, LicenseInfo.class);
-        } catch (IOException e) {
-            throw new LicenseException("Error leyendo la licencia local", e);
+    private Map<String, String> parse(String json) {
+        Map<String, String> map = new HashMap<>();
+        json = json.replaceAll("[{}\" ]", "");
+        String[] parts = json.split(",");
+        for (String part : parts) {
+            String[] pair = part.split(":");
+            if (pair.length == 2) map.put(pair[0], pair[1]);
         }
-    }
-
-    private File getFileForProduct(String product) {
-        String safeProductName = product.replaceAll("[^a-zA-Z0-9\\-_]", "_");
-        return Paths.get(LICENSE_DIR, safeProductName + ".license.json").toFile();
+        return map;
     }
 }
